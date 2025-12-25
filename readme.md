@@ -25,33 +25,39 @@ Predict the top 3 finishers (podium) in racing events using machine learning.
 ## Quick Start
 
 ```bash
-# Run with Docker
-docker-compose up
+# Build Docker image
+docker build -t podium-prediction .
 
-# API: http://localhost:8000
-# Dashboard: http://localhost:8501
+# Run container
+docker run -it --rm -p 9696:9696 podium-prediction
+
+# API: http://localhost:9696
 ```
 
 ## API Example
 
 ```python
-# POST /predict
-{
-  "race_id": 123,
-  "drivers": [
-    {"driver_id": 1, "features": {...}},
-    {"driver_id": 2, "features": {...}}
-  ]
+import requests
+
+# Example driver data for prediction
+driver_data = {
+    'grid': 5,                          # Starting grid position
+    'driverRef': 'leclerc',            # Driver reference ID
+    'constructorRef': 'ferrari',       # Constructor/team reference
+    'year': 2024,                      # Race year
+    'round': 10,                       # Race round number
+    'podium_rate_last_year': 0.45,    # Podium rate from previous season
+    'podium_rate_curr_year': 0.50,    # Current season podium rate
+    'podium_rate_all_time': 0.38      # Career podium rate
 }
 
-# Response
-{
-  "podium": [
-    {"position": 1, "driver_id": 5, "probability": 0.763},
-    {"position": 2, "driver_id": 12, "probability": 0.681},
-    {"position": 3, "driver_id": 8, "probability": 0.547}
-  ]
-}
+# Make prediction request
+url = 'http://localhost:9696/predict'
+response = requests.post(url, json=driver_data)
+result = response.json()
+
+print(f"Podium Probability: {result['podium_probability']:.2%}")
+print(f"Prediction: {result['podium_prediction']}")
 ```
 
 ## Deployment
